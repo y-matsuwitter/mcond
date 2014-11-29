@@ -5,19 +5,15 @@ import (
 	"time"
 
 	"github.com/y-matsuwitter/mcond"
-	redis "gopkg.in/redis.v2"
 )
 
 func main() {
-	client := redis.NewTCPClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-	mc := mcond.NewMCond(client)
+	mc := mcond.NewMCond(mcond.MCondOption{})
 	key := "test"
 	mc.AddCond(key)
-	mc.AddHost("localhost:8080")
+	mc.AddHost("localhost:9012")
+	mc.Clear()
+
 	mc.AddProcessing(key)
 	go func() {
 		fmt.Println("doing heavy task.")
@@ -25,7 +21,7 @@ func main() {
 		mc.AddCompleted(key)
 		mc.Broadcast(key)
 	}()
-	fmt.Println(mc)
+
 	mc.WaitForAvailable(key)
 	fmt.Println("completed!!")
 	time.Sleep(time.Second)
